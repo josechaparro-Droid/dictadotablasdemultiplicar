@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Dictados</title>
+    <style>
+        /* Aplicando la paleta de colores con el patrón Ben-Day sutil */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #CEDDF4; /* Fondo claro de la paleta */
+            /* Patrón Ben-Day sutil con transparencia */
+            background-image: radial-gradient(rgba(87, 147, 170, 0.35) 1.5px, transparent 1.5px);
+            background-size: 18px 18px;
+            color: #22254E; /* Texto principal oscuro */
+            text-align: center;
+            padding: 30px 10px;
+            margin: 0;
+        }
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(34, 37, 78, 0.15);
+            border: 1px solid #BCBAC5;
+        }
+        .logo-colegio {
+            max-width: 140px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        h1 { 
+            color: #22254E; 
+            margin-bottom: 25px; 
+            margin-top: 10px;
+            font-weight: 700;
+        }
+        h2 { color: #22254E; }
+        label { 
+            font-weight: bold; 
+            display: block; 
+            margin-top: 25px; 
+            text-align: left;
+            color: #22254E;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            box-sizing: border-box;
+            border: 2px solid #BCBAC5;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #22254E;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #5793AA;
+        }
+        
+        /* Botones principales */
+        .btn-principal {
+            background-color: #5793AA; /* Color turquesa/acero destacado */
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            margin-top: 30px;
+            font-size: 18px;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(87, 147, 170, 0.3);
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .btn-principal:hover { 
+            background-color: #437587; 
+        }
+        .btn-principal:active {
+            transform: scale(0.98);
+        }
+        
+        /* Contenedor de Checkboxes para las tablas */
+        .grid-tablas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #BCBAC5;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            color: #22254E;
+            font-weight: 500;
+        }
+        .checkbox-item:hover {
+            background-color: #CEDDF4;
+        }
+        .checkbox-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+            accent-color: #5793AA; /* Color del check personalizado */
+        }
+
+        /* Botones de configuración rápida */
+        .btn-grupo {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .btn-rapido {
+            background-color: #22254E; /* Azul marino profundo */
+            color: white;
+            padding: 10px;
+            font-size: 13px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-rapido:hover { 
+            background-color: #1E2134; 
+        }
+        
+        /* Modo Proyección - Fondo oscuro con puntos Ben-Day oscuros de contraste sutil */
+        #pantalla-proyeccion {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #1E2134; /* Fondo súper oscuro de la paleta */
+            /* Puntos Ben-Day oscuros en la pantalla para textura */
+            background-image: radial-gradient(rgba(34, 37, 78, 0.6) 3px, transparent 3px);
+            background-size: 30px 30px;
+            color: #CEDDF4; /* Letras azul muy claro para contraste ideal */
+            justify-content: center;
+            align-content: center;
+            flex-direction: column;
+        }
+        #operacion {
+            font-size: 160px;
+            font-weight: bold;
+            margin: 0;
+            letter-spacing: -2px;
+        }
+        #contador {
+            font-size: 36px;
+            color: #BCBAC5; /* Color gris suave secundario */
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+        
+        /* Resultados */
+        #resultados { display: none; text-align: left; }
+        .grid-resultados {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .resultado-item {
+            padding: 8px 12px;
+            background-color: #f8fafc;
+            border-left: 4px solid #5793AA;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="configuracion">
+    <!-- Logo desde Google Drive -->
+    <img src="https://lh3.googleusercontent.com/d/1TOni1L5cT-PFmA6lLsgG2z8dbpC3eTZm" alt="Logo Colegio" class="logo-colegio">
+    
+    <h1>🎯 Dictado de Tablas</h1>
+    
+    <!-- Selección de Tablas -->
+    <label>📚 ¿Qué tablas incluir?</label>
+    <div class="btn-grupo">
+        <button type="button" class="btn-rapido" onclick="seleccionarNivel('inicial')">Inicial (2, 5, 10)</button>
+        <button type="button" class="btn-rapido" onclick="seleccionarNivel('medio')">Intermedio (2 al 6)</button>
+        <button type="button" class="btn-rapido" onclick="seleccionarNivel('completo')">Avanzado (2 al 12)</button>
+    </div>
+
+    <div class="grid-tablas">
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="2" checked> Del 2</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="3" checked> Del 3</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="4" checked> Del 4</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="5" checked> Del 5</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="6" checked> Del 6</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="7" checked> Del 7</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="8" checked> Del 8</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="9" checked> Del 9</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="10" checked> Del 10</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="11" checked> Del 11</label>
+        <label class="checkbox-item"><input type="checkbox" class="tabla-chk" value="12" checked> Del 12</label>
+    </div>
+
+    <!-- Otros Parámetros -->
+    <label for="cantidad">🔢 Cantidad de ejercicios:</label>
+    <input type="number" id="cantidad" value="10" min="3" max="30">
+
+    <label for="tiempo">⏱️ Segundos por pregunta:</label>
+    <input type="number" id="tiempo" value="7" min="2" max="20">
+
+    <button class="btn-principal" onclick="comenzarDictado()">🚀 ¡Comenzar Dictado!</button>
+</div>
+
+<!-- Pantalla completa para proyectar -->
+<div id="pantalla-proyeccion">
+    <div id="contador">Pregunta 1 de 10</div>
+    <div id="operacion">0 x 0</div>
+</div>
+
+<!-- Pantalla de revisión -->
+<div class="container" id="resultados">
+    <h2>✅ Corrección</h2>
+    <p>Resultados para revisar en la pizarra:</p>
+    <div class="grid-resultados" id="lista-resultados"></div>
+    <button class="btn-principal" onclick="reiniciar()">🔄 Volver a configurar</button>
+</div>
+
+<script>
+    let preguntas = [];
+    let indiceActual = 0;
+    let tiempoPorPregunta = 7;
+    let timeoutId;
+
+    function seleccionarNivel(nivel) {
+        const checkboxes = document.querySelectorAll('.tabla-chk');
+        checkboxes.forEach(chk => chk.checked = false);
+
+        if (nivel === 'inicial') {
+            [2, 5, 10].forEach(n => document.querySelector(`.tabla-chk[value="${n}"]`).checked = true);
+            document.getElementById('tiempo').value = 8;
+        } else if (nivel === 'medio') {
+            [2, 3, 4, 5, 6, 10].forEach(n => document.querySelector(`.tabla-chk[value="${n}"]`).checked = true);
+            document.getElementById('tiempo').value = 7;
+        } else if (nivel === 'completo') {
+            checkboxes.forEach(chk => chk.checked = true);
+            document.getElementById('tiempo').value = 5;
+        }
+    }
+
+    function comenzarDictado() {
+        const cantidadPedida = parseInt(document.getElementById('cantidad').value);
+        tiempoPorPregunta = parseInt(document.getElementById('tiempo').value);
+        
+        const checkboxes = document.querySelectorAll('.tabla-chk:checked');
+        let tablasSeleccionadas = Array.from(checkboxes).map(chk => parseInt(chk.value));
+
+        if (tablasSeleccionadas.length === 0) {
+            alert("Por favor, selecciona al menos una tabla para el dictado.");
+            return;
+        }
+        
+        let pozoDePreguntas = [];
+        tablasSeleccionadas.forEach(tabla => {
+            for (let i = 1; i <= 10; i++) {
+                pozoDePreguntas.push({ n1: tabla, n2: i, resultado: tabla * i });
+            }
+        });
+
+        if (cantidadPedida > pozoDePreguntas.length) {
+            alert(`Con las tablas seleccionadas solo hay ${pozoDePreguntas.length} combinaciones únicas posibles. Por favor, disminuye la cantidad de ejercicios o selecciona más tablas.`);
+            return;
+        }
+
+        for (let i = pozoDePreguntas.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pozoDePreguntas[i], pozoDePreguntas[j]] = [pozoDePreguntas[j], pozoDePreguntas[i]];
+        }
+
+        preguntas = pozoDePreguntas.slice(0, cantidadPedida);
+
+        indiceActual = 0;
+        document.getElementById('configuracion').style.display = 'none';
+        document.getElementById('pantalla-proyeccion').style.display = 'flex';
+        
+        mostrarPregunta();
+    }
+
+    function mostrarPregunta() {
+        if (indiceActual < preguntas.length) {
+            document.getElementById('contador').innerText = `Pregunta ${indiceActual + 1} de ${preguntas.length}`;
+            document.getElementById('operacion').innerText = `${preguntas[indiceActual].n1} x ${preguntas[indiceActual].n2}`;
+            
+            indiceActual++;
+            timeoutId = setTimeout(mostrarPregunta, tiempoPorPregunta * 1000);
+        } else {
+            terminarDictado();
+        }
+    }
+
+    function terminarDictado() {
+        clearTimeout(timeoutId);
+        document.getElementById('pantalla-proyeccion').style.display = 'none';
+        document.getElementById('resultados').style.display = 'block';
+        
+        const lista = document.getElementById('lista-resultados');
+        lista.innerHTML = '';
+        
+        preguntas.forEach((p, index) => {
+            const item = document.createElement('div');
+            item.className = 'resultado-item';
+            item.innerHTML = `<strong>${index + 1})</strong> ${p.n1} x ${p.n2} = <strong>${p.resultado}</strong>`;
+            lista.appendChild(item);
+        });
+    }
+
+    function reiniciar() {
+        document.getElementById('resultados').style.display = 'none';
+        document.getElementById('configuracion').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
